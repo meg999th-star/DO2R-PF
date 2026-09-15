@@ -13,10 +13,13 @@
             background-color: #121212;
             color: #ffffff;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            gap: 20px;
         }
         .card {
             background-color: #1e1e1e;
@@ -24,11 +27,11 @@
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             width: 100%;
-            max-width: 380px;
+            max-width: 420px;
             text-align: center;
             border: 1px solid #333;
         }
-        h2 {
+        h2, h3 {
             margin-top: 0;
             color: #4CAF50;
         }
@@ -66,7 +69,7 @@
 
         /* ส่วนแสดงผลโปรไฟล์ */
         .profile-container {
-            display: none; /* ซ่อนไว้ก่อน พอกรอกชื่อค่อยแสดง */
+            display: none;
             margin-top: 20px;
             padding-top: 20px;
             border-top: 1px solid #333;
@@ -114,6 +117,43 @@
             display: none;
         }
 
+        /* ส่วนตารางคำอธิบายแร้ง */
+        .rank-guide-card {
+            background-color: #1e1e1e;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid #333;
+        }
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #2a2a2a;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* สีประจำระดับแร้ง */
+        .rank-bronze { color: #cd7f32; border-left: 4px solid #cd7f32; }
+        .rank-silver { color: #c0c0c0; border-left: 4px solid #c0c0c0; }
+        .rank-gold { color: #ffd700; border-left: 4px solid #ffd700; }
+        .rank-platinum { color: #00e5ff; border-left: 4px solid #00e5ff; }
+        .rank-diamond { color: #b9f2ff; border-left: 4px solid #b9f2ff; }
+        .rank-master { color: #ab47bc; border-left: 4px solid #ab47bc; }
+        .rank-grandmaster { color: #ff1744; border-left: 4px solid #ff1744; text-shadow: 0 0 6px rgba(255, 23, 68, 0.4); }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -122,6 +162,7 @@
 </head>
 <body>
 
+    <!-- การ์ดค้นหาโปรไฟล์ -->
     <div class="card">
         <h2>ค้นหาโปรไฟล์ผู้เล่น</h2>
         <input type="text" id="usernameInput" placeholder="กรอกชื่อตัวละคร..." autocomplete="off">
@@ -151,12 +192,49 @@
         </div>
     </div>
 
+    <!-- การ์ดคำอธิบายลำดับชั้นแร้ง -->
+    <div class="rank-guide-card">
+        <h3 style="text-align: center; margin-bottom: 5px;">🏆 ลำดับขั้นของแร้ง (Rank Tier)</h3>
+        <p style="font-size: 12px; color: #aaa; text-align: center; margin-top: 0;">เรียงลำดับระดับจากต่ำสุดไปสูงสุด</p>
+        
+        <div class="rank-list">
+            <div class="rank-item rank-bronze">
+                <span>🥉 Bronze</span>
+                <span style="font-size: 12px; color: #888;">ระดับเริ่มต้น</span>
+            </div>
+            <div class="rank-item rank-silver">
+                <span>🥈 Silver</span>
+                <span style="font-size: 12px; color: #888;">ระดับทั่วไป</span>
+            </div>
+            <div class="rank-item rank-gold">
+                <span>🥇 Gold</span>
+                <span style="font-size: 12px; color: #888;">ระดับปานกลาง</span>
+            </div>
+            <div class="rank-item rank-platinum">
+                <span>💎 Platinum</span>
+                <span style="font-size: 12px; color: #888;">ระดับฝีมือดี</span>
+            </div>
+            <div class="rank-item rank-diamond">
+                <span>💠 Diamond</span>
+                <span style="font-size: 12px; color: #888;">ระดับเชี่ยวชาญ</span>
+            </div>
+            <div class="rank-item rank-master">
+                <span>🔮 Master</span>
+                <span style="font-size: 12px; color: #888;">ระดับปรมาจารย์</span>
+            </div>
+            <div class="rank-item rank-grandmaster">
+                <span>👑 Grandmaster</span>
+                <span style="font-size: 12px; color: #ff80ab;">ระดับสูงสุด</span>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ฐานข้อมูลผู้เล่นสมมติ (สามารถแก้ไขชื่อ เลเวล แร้ง และเงินตรงนี้ได้เลย)
+        // ฐานข้อมูลผู้เล่นสมมติ
         const playersDatabase = {
             "MEG_007": {
                 lv: 1987,
-                rank: "KING",
+                rank: "Grandmaster",
                 money: 99999,
                 avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ShadowKey"
             },
@@ -179,7 +257,6 @@
             const profileBox = document.getElementById("profileBox");
             const errorMsg = document.getElementById("errorMsg");
 
-            // ซ่อนกล่องข้อความไว้ก่อนทำการค้นหาใหม่
             profileBox.style.display = "none";
             errorMsg.style.display = "none";
 
@@ -188,21 +265,17 @@
                 return;
             }
 
-            // ค้นหาชื่อในฐานข้อมูล (ถ้าพบข้อมูล)
             if (playersDatabase[nameInput]) {
                 const playerData = playersDatabase[nameInput];
 
-                // อัปเดตข้อมูลลงหน้าเว็บ
                 document.getElementById("displayName").innerText = nameInput;
                 document.getElementById("displayLv").innerText = "Lv. " + playerData.lv;
                 document.getElementById("displayRank").innerText = playerData.rank;
-                document.getElementById("displayMoney").innerText = "$" + playerData.money.toLocaleString(); // ใส่ comma คั่นหลักพัน
+                document.getElementById("displayMoney").innerText = "$" + playerData.money.toLocaleString();
                 document.getElementById("avatarImg").src = playerData.avatar;
 
-                // แสดงกล่องโปรไฟล์
                 profileBox.style.display = "block";
             } else {
-                // ถ้าไม่พบข้อมูล หรือกรอกชื่อที่ไม่มีในระบบ
                 errorMsg.style.display = "block";
             }
         }
