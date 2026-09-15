@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodge the Boulders - Mini Game</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        body { background-color: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 10px; }
+        .game-header { text-align: center; margin-bottom: 10px; }
+        .btn-back { background-color: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 8px; cursor: pointer; text-decoration: none; font-weight: bold; font-size: 14px; margin-bottom: 10px; display: inline-block; }
+        .btn-back:hover { background-color: #444; }
+        .score-board { font-size: 18px; font-weight: bold; color: #4CAF50; margin-top: 5px; }
+        canvas { background-color: #1e1e1e; border: 2px solid #333; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); max-width: 100%; }
+        
+        /* ปุ่มลูกศรบนหน้าจอ */
+        .controls { display: flex; gap: 20px; margin-top: 15px; width: 100%; max-width: 360px; }
+        .ctrl-btn { flex: 1; padding: 18px; background-color: #2a2a2a; color: #fff; border: 2px solid #444; border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .ctrl-btn:active { background-color: #4CAF50; border-color: #4CAF50; transform: translateY(2px); }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">⬅️ กลับหน้าเช็คโปรไฟล์</a>
+
+    <div class="game-header">
+        <h2 style="margin: 0; color: #4CAF50;">🚗 Dodge the Boulders</h2>
+        <div id="scoreText" class="score-board">Score: 0 | Speed: 1x</div>
+    </div>
+
+    <canvas id="gameCanvas" width="360" height="480"></canvas>
+
+    <!-- ปุ่มกดซ้าย-ขวาบนจอ -->
+    <div class="controls">
+        <div class="ctrl-btn" id="btnLeft">◀</div>
+        <div class="ctrl-btn" id="btnRight">▶</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreText = document.getElementById("scoreText");
+
+        let score = 0;
+        let gameOver = false;
+        let baseSpeed = 3;
+        let currentSpeedMultiplier = 1;
+
+        // รถของผู้เล่น
+        const player = {
+            width: 36,
+            height: 60,
+            x: canvas.width / 2 - 18,
+            y: canvas.height - 80,
+            speed: 6,
+            dx: 0
+        };
+
+        // ก้อนหิน (สุ่มสี ส้ม/ม่วง)
+        const boulders = [];
+        const colors = ["#FF5722", "#9C27B0"]; // ส้ม, ม่วง
+
+        function spawnBoulder() {
+            const size = Math.random() * 20 + 25; // ขนาด 25 - 45px
+            boulders.push({
+                x: Math.random() * (canvas.width - size),
+                y: -size,
+                size: size,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: (baseSpeed + Math.random() * 2) * currentSpeedMultiplier
+            });
+        }
+
+        // วาดรถ
+        function drawPlayer() {
+            ctx.fillStyle = "#4CAF50";
+            ctx.beginPath();
+            ctx.roundRect(player.x, player.y, player.width, player.height, 8);
+            ctx.fill();
+
+            // ล้อรถ
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(player.x - 4, player.y + 8, 4, 12);
+            ctx.fillRect(player.x + player.width, player.y + 8, 4, 12);
+            ctx.fillRect(player.x - 4, player.y + player.height - 20, 4, 12);
+            ctx.fillRect(player.x + player.width, player.y + player.height - 20, 4, 12);
+        }
+
+        // วาดก้อนหิน
+        function drawBoulders() {
+            boulders.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(b.x + b.size/2, b.y + b.size/2, b.size/2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            });
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            // เคลื่อนที่รถ
+            player.x += player.dx;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // เคลื่อนที่ก้อนหิน
+            for (let i = boulders.length - 1; i >= 0; i--) {
+                const b = boulders[i];
+                b.y += b.speed;
+
+                // ชนขอบล่าง = ได้คะแนน
+                if (b.y > canvas.height) {
+                    boulders.splice(i, 1);
+                    score += 10;
+                    
+                    // เพิ่มความเร็วขึ้นเรื่อยๆ ทุกๆ 50 คะแนน
+                    currentSpeedMultiplier = 1 + Math.floor(score / 50) * 0.25;
+                    scoreText.innerText = `Score: ${score} | Speed: ${currentSpeedMultiplier.toFixed(2)}x`;
+                }
+
+                // ตรวจจับการชน (AABB Collision)
+                if (
+                    player.x < b.x + b.size &&
+                    player.x + player.width > b.x &&
+                    player.y < b.y + b.size &&
+                    player.y + player.height > b.y
+                ) {
+                    gameOver = true;
+                    setTimeout(() => {
+                        alert(`💥 GAME OVER!\nคะแนนที่ได้: ${score}`);
+                        document.location.reload();
+                    }, 10);
+                }
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawBoulders();
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            if (!gameOver) requestAnimationFrame(gameLoop);
+        }
+
+        // ตัวจับเวลาเสกหิน
+        setInterval(() => {
+            if (!gameOver) spawnBoulder();
+        }, 800);
+
+        // ควบคุมผ่านคีย์บอร์ด (ลูกศร ซ้าย-ขวา)
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") player.dx = -player.speed;
+            if (e.key === "ArrowRight") player.dx = player.speed;
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") player.dx = 0;
+        });
+
+        // ควบคุมผ่านปุ่มบนหน้าจอ (รองรับทั้ง Click และ Touch)
+        const btnLeft = document.getElementById("btnLeft");
+        const btnRight = document.getElementById("btnRight");
+
+        const startLeft = () => player.dx = -player.speed;
+        const startRight = () => player.dx = player.speed;
+        const stop = () => player.dx = 0;
+
+        btnLeft.addEventListener("touchstart", (e) => { e.preventDefault(); startLeft(); });
+        btnLeft.addEventListener("touchend", stop);
+        btnLeft.addEventListener("mousedown", startLeft);
+        btnLeft.addEventListener("mouseup", stop);
+
+        btnRight.addEventListener("touchstart", (e) => { e.preventDefault(); startRight(); });
+        btnRight.addEventListener("touchend", stop);
+        btnRight.addEventListener("mousedown", startRight);
+        btnRight.addEventListener("mouseup", stop);
+
+        gameLoop();
+    </script>
+</body>
+</html>
