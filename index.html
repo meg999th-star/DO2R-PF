@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเช็คโปรไฟล์ผู้เล่น</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* ส่วนแสดงผลโปรไฟล์ */
+        .profile-container {
+            display: none; /* ซ่อนไว้ก่อน พอกรอกชื่อค่อยแสดง */
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid #4CAF50;
+            margin-bottom: 10px;
+        }
+        .player-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 5px 0;
+            color: #fff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .rank-text { color: #ffca28; }
+        .money-text { color: #66bb6a; }
+        .error-msg {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>ค้นหาโปรไฟล์ผู้เล่น</h2>
+        <input type="text" id="usernameInput" placeholder="กรอกชื่อตัวละคร..." autocomplete="off">
+        <button onclick="searchProfile()">ค้นหาโปรไฟล์</button>
+        
+        <div id="errorMsg" class="error-msg">❌ ไม่พบข้อมูลผู้เล่นชื่อนี้</div>
+
+        <!-- การ์ดแสดงโปรไฟล์ผู้เล่น -->
+        <div id="profileBox" class="profile-container">
+            <img id="avatarImg" class="avatar" src="" alt="Avatar">
+            <div id="displayName" class="player-name">-</div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">LEVEL</div>
+                    <div id="displayLv" class="stat-value">Lv. 1</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">RANK</div>
+                    <div id="displayRank" class="stat-value rank-text">Unranked</div>
+                </div>
+                <div class="stat-box" style="grid-column: span 2;">
+                    <div class="stat-label">จำนวนเงินคงเหลือ</div>
+                    <div id="displayMoney" class="stat-value money-text">$0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ฐานข้อมูลผู้เล่นสมมติ (สามารถแก้ไขชื่อ เลเวล แร้ง และเงินตรงนี้ได้เลย)
+        const playersDatabase = {
+            "ShadowKey": {
+                lv: 45,
+                rank: "Diamond",
+                money: 150000,
+                avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ShadowKey"
+            },
+            "AlexPro": {
+                lv: 12,
+                rank: "Silver",
+                money: 3500,
+                avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AlexPro"
+            },
+            "Guest01": {
+                lv: 1,
+                rank: "Bronze",
+                money: 500,
+                avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Guest01"
+            }
+        };
+
+        function searchProfile() {
+            const nameInput = document.getElementById("usernameInput").value.trim();
+            const profileBox = document.getElementById("profileBox");
+            const errorMsg = document.getElementById("errorMsg");
+
+            // ซ่อนกล่องข้อความไว้ก่อนทำการค้นหาใหม่
+            profileBox.style.display = "none";
+            errorMsg.style.display = "none";
+
+            if (nameInput === "") {
+                alert("กรุณากรอกชื่อผู้เล่นก่อนครับ");
+                return;
+            }
+
+            // ค้นหาชื่อในฐานข้อมูล (ถ้าพบข้อมูล)
+            if (playersDatabase[nameInput]) {
+                const playerData = playersDatabase[nameInput];
+
+                // อัปเดตข้อมูลลงหน้าเว็บ
+                document.getElementById("displayName").innerText = nameInput;
+                document.getElementById("displayLv").innerText = "Lv. " + playerData.lv;
+                document.getElementById("displayRank").innerText = playerData.rank;
+                document.getElementById("displayMoney").innerText = "$" + playerData.money.toLocaleString(); // ใส่ comma คั่นหลักพัน
+                document.getElementById("avatarImg").src = playerData.avatar;
+
+                // แสดงกล่องโปรไฟล์
+                profileBox.style.display = "block";
+            } else {
+                // ถ้าไม่พบข้อมูล หรือกรอกชื่อที่ไม่มีในระบบ
+                errorMsg.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+</html>
