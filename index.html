@@ -75,32 +75,13 @@
             border-top: 1px solid #333;
             animation: fadeIn 0.4s ease-in-out;
         }
-        .avatar-wrapper {
-            position: relative;
-            display: inline-block;
-        }
         .avatar {
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             border: 3px solid #4CAF50;
-            margin-bottom: 5px;
-            object-fit: cover;
-        }
-        .change-avatar-btn {
-            background: #333;
-            color: #ccc;
-            border: 1px solid #555;
-            padding: 4px 10px;
-            font-size: 11px;
-            border-radius: 12px;
-            cursor: pointer;
             margin-bottom: 10px;
-            width: auto;
-        }
-        .change-avatar-btn:hover {
-            background: #444;
-            color: #fff;
+            object-fit: cover;
         }
         .player-name {
             font-size: 22px;
@@ -136,7 +117,7 @@
             display: none;
         }
 
-        /* คลาสสีแร้งสำหรับแสดงผล */
+        /* คลาสสีประจำแร้ง */
         .rank-bronze-color { color: #cd7f32; }
         .rank-silver-color { color: #c0c0c0; }
         .rank-gold-color { color: #ffd700; }
@@ -145,7 +126,7 @@
         .rank-master-color { color: #ab47bc; }
         .rank-grandmaster-color { color: #ff1744; text-shadow: 0 0 8px rgba(255, 23, 68, 0.6); }
 
-        /* ส่วนตารางคำอธิบายแร้ง */
+        /* การ์ดคำอธิบายลำดับแร้ง */
         .rank-guide-card {
             background-color: #1e1e1e;
             padding: 24px;
@@ -188,7 +169,7 @@
 </head>
 <body>
 
-    <!-- การ์ดค้นหาและแสดงโปรไฟล์ -->
+    <!-- การ์ดค้นหาโปรไฟล์ -->
     <div class="card">
         <h2>ค้นหาโปรไฟล์ผู้เล่น</h2>
         <input type="text" id="usernameInput" placeholder="กรอกชื่อตัวละคร..." autocomplete="off">
@@ -197,11 +178,7 @@
         <div id="errorMsg" class="error-msg">❌ ไม่พบข้อมูลผู้เล่นชื่อนี้</div>
 
         <div id="profileBox" class="profile-container">
-            <div>
-                <img id="avatarImg" class="avatar" src="" alt="Avatar"><br>
-                <button class="change-avatar-btn" onclick="changeAvatar()">📷 เปลี่ยนรูปโปรไฟล์</button>
-            </div>
-            
+            <img id="avatarImg" class="avatar" src="" alt="Avatar">
             <div id="displayName" class="player-name">-</div>
 
             <div class="stats-grid">
@@ -215,13 +192,13 @@
                 </div>
                 <div class="stat-box" style="grid-column: span 2;">
                     <div class="stat-label">จำนวนเงินคงเหลือ</div>
-                    <div id="displayMoney" class="stat-value money-text">R0</div>
+                    <div id="displayMoney" class="stat-value money-text">$0</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- การ์ดคำอธิบายลำดับชั้นแร้ง -->
+    <!-- การ์ดลำดับขั้นของแร้ง -->
     <div class="rank-guide-card">
         <h3 style="text-align: center; margin-bottom: 5px;">🏆 ลำดับขั้นของแร้ง (Rank Tier)</h3>
         <p style="font-size: 12px; color: #aaa; text-align: center; margin-top: 0;">เรียงลำดับระดับจากต่ำสุดไปสูงสุด</p>
@@ -238,8 +215,6 @@
     </div>
 
     <script>
-        let currentSearchedUser = "";
-
         const playersDatabase = {
             "MEG_007": {
                 lv: 1987,
@@ -261,7 +236,6 @@
             }
         };
 
-        // แผนผังสีประจำแร้ง
         const rankColors = {
             "Bronze": "rank-bronze-color",
             "Silver": "rank-silver-color",
@@ -286,15 +260,13 @@
             }
 
             if (playersDatabase[nameInput]) {
-                currentSearchedUser = nameInput;
                 const playerData = playersDatabase[nameInput];
 
                 document.getElementById("displayName").innerText = nameInput;
                 document.getElementById("displayLv").innerText = "Lv. " + playerData.lv;
-                document.getElementById("displayMoney").innerText = "R" + playerData.money.toLocaleString();
+                document.getElementById("displayMoney").innerText = "$" + playerData.money.toLocaleString();
                 document.getElementById("avatarImg").src = playerData.avatar;
 
-                // อัปเดตชื่อ Rank และใส่สีตามระดับแร้ง
                 const rankElement = document.getElementById("displayRank");
                 rankElement.innerText = playerData.rank;
                 rankElement.className = "stat-value " + (rankColors[playerData.rank] || "");
@@ -302,18 +274,6 @@
                 profileBox.style.display = "block";
             } else {
                 errorMsg.style.display = "block";
-            }
-        }
-
-        // ฟังก์ชันเปลี่ยนรูปโปรไฟล์
-        function changeAvatar() {
-            const newUrl = prompt("กรุณาวาง ลิงก์รูปภาพ (Image URL) ที่ต้องการเปลี่ยนเป็นรูปโปรไฟล์:");
-            if (newUrl && newUrl.trim() !== "") {
-                // อัปเดตรูปในหน้าเว็บ และในฐานข้อมูลจำลอง
-                document.getElementById("avatarImg").src = newUrl.trim();
-                if (currentSearchedUser && playersDatabase[currentSearchedUser]) {
-                    playersDatabase[currentSearchedUser].avatar = newUrl.trim();
-                }
             }
         }
     </script>
