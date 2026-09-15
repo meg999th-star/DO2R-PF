@@ -75,12 +75,32 @@
             border-top: 1px solid #333;
             animation: fadeIn 0.4s ease-in-out;
         }
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+        }
         .avatar {
             width: 90px;
             height: 90px;
             border-radius: 50%;
             border: 3px solid #4CAF50;
+            margin-bottom: 5px;
+            object-fit: cover;
+        }
+        .change-avatar-btn {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 12px;
+            cursor: pointer;
             margin-bottom: 10px;
+            width: auto;
+        }
+        .change-avatar-btn:hover {
+            background: #444;
+            color: #fff;
         }
         .player-name {
             font-size: 22px;
@@ -109,13 +129,21 @@
             font-size: 18px;
             font-weight: bold;
         }
-        .rank-text { color: #ffca28; }
         .money-text { color: #66bb6a; }
         .error-msg {
             color: #f44336;
             margin-top: 10px;
             display: none;
         }
+
+        /* คลาสสีแร้งสำหรับแสดงผล */
+        .rank-bronze-color { color: #cd7f32; }
+        .rank-silver-color { color: #c0c0c0; }
+        .rank-gold-color { color: #ffd700; }
+        .rank-platinum-color { color: #00e5ff; }
+        .rank-diamond-color { color: #b9f2ff; }
+        .rank-master-color { color: #ab47bc; }
+        .rank-grandmaster-color { color: #ff1744; text-shadow: 0 0 8px rgba(255, 23, 68, 0.6); }
 
         /* ส่วนตารางคำอธิบายแร้ง */
         .rank-guide-card {
@@ -144,8 +172,6 @@
             font-size: 14px;
             font-weight: bold;
         }
-        
-        /* สีประจำระดับแร้ง */
         .rank-bronze { color: #cd7f32; border-left: 4px solid #cd7f32; }
         .rank-silver { color: #c0c0c0; border-left: 4px solid #c0c0c0; }
         .rank-gold { color: #ffd700; border-left: 4px solid #ffd700; }
@@ -162,7 +188,7 @@
 </head>
 <body>
 
-    <!-- การ์ดค้นหาโปรไฟล์ -->
+    <!-- การ์ดค้นหาและแสดงโปรไฟล์ -->
     <div class="card">
         <h2>ค้นหาโปรไฟล์ผู้เล่น</h2>
         <input type="text" id="usernameInput" placeholder="กรอกชื่อตัวละคร..." autocomplete="off">
@@ -170,9 +196,12 @@
         
         <div id="errorMsg" class="error-msg">❌ ไม่พบข้อมูลผู้เล่นชื่อนี้</div>
 
-        <!-- การ์ดแสดงโปรไฟล์ผู้เล่น -->
         <div id="profileBox" class="profile-container">
-            <img id="avatarImg" class="avatar" src="" alt="Avatar">
+            <div>
+                <img id="avatarImg" class="avatar" src="" alt="Avatar"><br>
+                <button class="change-avatar-btn" onclick="changeAvatar()">📷 เปลี่ยนรูปโปรไฟล์</button>
+            </div>
+            
             <div id="displayName" class="player-name">-</div>
 
             <div class="stats-grid">
@@ -182,7 +211,7 @@
                 </div>
                 <div class="stat-box">
                     <div class="stat-label">RANK</div>
-                    <div id="displayRank" class="stat-value rank-text">Unranked</div>
+                    <div id="displayRank" class="stat-value">Unranked</div>
                 </div>
                 <div class="stat-box" style="grid-column: span 2;">
                     <div class="stat-label">จำนวนเงินคงเหลือ</div>
@@ -198,45 +227,25 @@
         <p style="font-size: 12px; color: #aaa; text-align: center; margin-top: 0;">เรียงลำดับระดับจากต่ำสุดไปสูงสุด</p>
         
         <div class="rank-list">
-            <div class="rank-item rank-bronze">
-                <span>🥉 Bronze</span>
-                <span style="font-size: 12px; color: #888;">ระดับเริ่มต้น</span>
-            </div>
-            <div class="rank-item rank-silver">
-                <span>🥈 Silver</span>
-                <span style="font-size: 12px; color: #888;">ระดับทั่วไป</span>
-            </div>
-            <div class="rank-item rank-gold">
-                <span>🥇 Gold</span>
-                <span style="font-size: 12px; color: #888;">ระดับปานกลาง</span>
-            </div>
-            <div class="rank-item rank-platinum">
-                <span>💎 Platinum</span>
-                <span style="font-size: 12px; color: #888;">ระดับฝีมือดี</span>
-            </div>
-            <div class="rank-item rank-diamond">
-                <span>💠 Diamond</span>
-                <span style="font-size: 12px; color: #888;">ระดับเชี่ยวชาญ</span>
-            </div>
-            <div class="rank-item rank-master">
-                <span>🔮 Master</span>
-                <span style="font-size: 12px; color: #888;">ระดับปรมาจารย์</span>
-            </div>
-            <div class="rank-item rank-grandmaster">
-                <span>👑 Grandmaster</span>
-                <span style="font-size: 12px; color: #ff80ab;">ระดับสูงสุด</span>
-            </div>
+            <div class="rank-item rank-bronze"><span>🥉 Bronze</span><span style="font-size: 12px; color: #888;">ระดับเริ่มต้น</span></div>
+            <div class="rank-item rank-silver"><span>🥈 Silver</span><span style="font-size: 12px; color: #888;">ระดับทั่วไป</span></div>
+            <div class="rank-item rank-gold"><span>🥇 Gold</span><span style="font-size: 12px; color: #888;">ระดับปานกลาง</span></div>
+            <div class="rank-item rank-platinum"><span>💎 Platinum</span><span style="font-size: 12px; color: #888;">ระดับฝีมือดี</span></div>
+            <div class="rank-item rank-diamond"><span>💠 Diamond</span><span style="font-size: 12px; color: #888;">ระดับเชี่ยวชาญ</span></div>
+            <div class="rank-item rank-master"><span>🔮 Master</span><span style="font-size: 12px; color: #888;">ระดับปรมาจารย์</span></div>
+            <div class="rank-item rank-grandmaster"><span>👑 Grandmaster</span><span style="font-size: 12px; color: #ff80ab;">ระดับสูงสุด</span></div>
         </div>
     </div>
 
     <script>
-        // ฐานข้อมูลผู้เล่นสมมติ
+        let currentSearchedUser = "";
+
         const playersDatabase = {
             "MEG_007": {
                 lv: 1987,
                 rank: "Grandmaster",
                 money: 99999,
-                avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=ShadowKey"
+                avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=MEG_007"
             },
             "AlexPro": {
                 lv: 12,
@@ -250,6 +259,17 @@
                 money: 500,
                 avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Guest01"
             }
+        };
+
+        // แผนผังสีประจำแร้ง
+        const rankColors = {
+            "Bronze": "rank-bronze-color",
+            "Silver": "rank-silver-color",
+            "Gold": "rank-gold-color",
+            "Platinum": "rank-platinum-color",
+            "Diamond": "rank-diamond-color",
+            "Master": "rank-master-color",
+            "Grandmaster": "rank-grandmaster-color"
         };
 
         function searchProfile() {
@@ -266,17 +286,34 @@
             }
 
             if (playersDatabase[nameInput]) {
+                currentSearchedUser = nameInput;
                 const playerData = playersDatabase[nameInput];
 
                 document.getElementById("displayName").innerText = nameInput;
                 document.getElementById("displayLv").innerText = "Lv. " + playerData.lv;
-                document.getElementById("displayRank").innerText = playerData.rank;
-                document.getElementById("displayMoney").innerText = "$" + playerData.money.toLocaleString();
+                document.getElementById("displayMoney").innerText = "R" + playerData.money.toLocaleString();
                 document.getElementById("avatarImg").src = playerData.avatar;
+
+                // อัปเดตชื่อ Rank และใส่สีตามระดับแร้ง
+                const rankElement = document.getElementById("displayRank");
+                rankElement.innerText = playerData.rank;
+                rankElement.className = "stat-value " + (rankColors[playerData.rank] || "");
 
                 profileBox.style.display = "block";
             } else {
                 errorMsg.style.display = "block";
+            }
+        }
+
+        // ฟังก์ชันเปลี่ยนรูปโปรไฟล์
+        function changeAvatar() {
+            const newUrl = prompt("กรุณาวาง ลิงก์รูปภาพ (Image URL) ที่ต้องการเปลี่ยนเป็นรูปโปรไฟล์:");
+            if (newUrl && newUrl.trim() !== "") {
+                // อัปเดตรูปในหน้าเว็บ และในฐานข้อมูลจำลอง
+                document.getElementById("avatarImg").src = newUrl.trim();
+                if (currentSearchedUser && playersDatabase[currentSearchedUser]) {
+                    playersDatabase[currentSearchedUser].avatar = newUrl.trim();
+                }
             }
         }
     </script>
